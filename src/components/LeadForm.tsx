@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { supabase } from '../lib/supabase'
 import {
   VirtualKeyboard,
   type VirtualKeyboardMode,
@@ -180,16 +179,24 @@ export function LeadForm({ onSuccess }: LeadFormProps) {
 
     setSubmitting(true)
 
-    const { error } = await supabase.from('leads').insert(payload)
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
 
-    setSubmitting(false)
+      if (!res.ok) {
+        setSubmitError('Não foi possível enviar seus dados. Tente novamente.')
+        return
+      }
 
-    if (error) {
+      onSuccess(payload)
+    } catch {
       setSubmitError('Não foi possível enviar seus dados. Tente novamente.')
-      return
+    } finally {
+      setSubmitting(false)
     }
-
-    onSuccess(payload)
   }
 
   return (
