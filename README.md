@@ -2,6 +2,8 @@
 
 Formulário touchscreen para captura de leads em totem de feira. Roda **100% offline**: os dados são salvos em CSV local, sem dependência de internet ou serviços externos.
 
+Os QR Codes no canto da tela abrem os sites das marcas (Raffiner e Tânia Veiga) num overlay com iframe, sem sair do formulário. Feche pelo ×, pela tecla Esc ou tocando fora do painel. Abrir os sites exige conexão com a internet.
+
 ## Requisitos
 
 - [Node.js](https://nodejs.org/) 20+ (LTS recomendado)
