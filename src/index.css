@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+
+:root {
+  --primary: #e8e4e0;
+  --primary-deep: #d8d2cc;
+  --primary-soft: #f3efeb;
+  --surface-solid: #fffcfa;
+  --ink: #1c1917;
+  --ink-muted: #6b6560;
+  --cream: #1c1917;
+  --cream-soft: rgba(28, 25, 23, 0.68);
+  --accent: #8b3a32;
+  --accent-soft: rgba(139, 58, 50, 0.14);
+  --error: #b5433a;
+  --radius: 14px;
+  --shadow: 0 24px 60px rgba(28, 25, 23, 0.12);
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+  --kiosk-keyboard-height: 300px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 17px;
+  color: var(--ink);
+  background: var(--primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button,
+input,
+textarea,
+select {
+  touch-action: manipulation;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
