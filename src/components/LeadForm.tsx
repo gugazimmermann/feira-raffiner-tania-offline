@@ -1,4 +1,6 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useSpeechToLead } from '../hooks/useSpeechToLead'
+import type { LeadSpeechPatch } from '../lib/parseLeadSpeech'
 import {
   VirtualKeyboard,
   type VirtualKeyboardMode,
@@ -87,6 +89,46 @@ export function LeadForm({ onSuccess }: LeadFormProps) {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [activeField, setActiveField] = useState<keyof LeadData | null>(null)
+
+  const applySpeechPatch = useCallback((patch: LeadSpeechPatch) => {
+    if (!patch.nome && !patch.empresa && !patch.whatsapp) {
+      setSubmitError(
+        'Não entendemos os dados. Diga, por exemplo: nome José, empresa Raffiner, WhatsApp 47 98870 4247.',
+      )
+      return
+    }
+
+    setActiveField(null)
+    setSubmitError(null)
+    setForm((current) => ({
+      ...current,
+      ...(patch.nome ? { nome: patch.nome } : {}),
+      ...(patch.empresa ? { empresa: patch.empresa } : {}),
+      ...(patch.whatsapp ? { whatsapp: formatWhatsapp(patch.whatsapp) } : {}),
+    }))
+    setErrors((current) => {
+      const next = { ...current }
+      if (patch.nome) delete next.nome
+      if (patch.empresa) delete next.empresa
+      if (patch.whatsapp) delete next.whatsapp
+      return next
+    })
+  }, [])
+
+  const {
+    supported: speechSupported,
+    status: speechStatus,
+    interimTranscript,
+    errorMessage: speechError,
+    toggle: toggleSpeech,
+  } = useSpeechToLead({ onResult: applySpeechPatch })
+
+  function handleVoiceToggle() {
+    if (speechStatus !== 'listening') {
+      setActiveField(null)
+    }
+    toggleSpeech()
+  }
 
   useEffect(() => {
     document.body.classList.toggle('keyboard-open', Boolean(activeField))
@@ -199,9 +241,47 @@ export function LeadForm({ onSuccess }: LeadFormProps) {
     }
   }
 
+  const listening = speechStatus === 'listening'
+  const speechHint = speechSupported
+    ? listening
+      ? interimTranscript || 'Ouvindo… Fale nome, empresa e WhatsApp.'
+      : 'Toque e diga: nome, empresa e WhatsApp.'
+    : 'Microfone disponível no Chrome.'
+
   return (
     <>
       <form className="lead-form" onSubmit={handleSubmit} noValidate>
+        <div className="voice-fill">
+          <button
+            type="button"
+            className={
+              listening
+                ? 'voice-fill__btn voice-fill__btn--listening'
+                : 'voice-fill__btn'
+            }
+            onClick={handleVoiceToggle}
+            disabled={!speechSupported || submitting}
+            aria-pressed={listening}
+            aria-label={listening ? 'Parar microfone' : 'Preencher por voz'}
+          >
+            <span className="voice-fill__icon" aria-hidden="true">
+              {listening ? (
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                  <rect x="7" y="7" width="10" height="10" rx="1.5" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                  <path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2Z" />
+                </svg>
+              )}
+            </span>
+            {listening ? 'Parar' : 'Falar'}
+          </button>
+          <p className="voice-fill__hint" aria-live="polite">
+            {speechError ?? speechHint}
+          </p>
+        </div>
+
         <div
           className={
             activeField === 'nome' ? 'field field--active' : 'field'
